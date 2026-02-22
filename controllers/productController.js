@@ -79,16 +79,16 @@ const removeProduct = async (req, res) => {
 // Thông tin sản phẩm 
 const singleProducts = async (req, res) => {
   try {
-      const {productId} = req.body
-      const product = await productModel.findById(productId)
-      if(!product){
-        res.json({success: false, message: "Product doesn't find!"})
-      }
-      else {
-        res.json({success:true, product})
-      }
+    const { productId } = req.body
+    const product = await productModel.findById(productId)
+    if (!product) {
+      res.json({ success: false, message: "Product doesn't find!" })
+    }
+    else {
+      res.json({ success: true, product })
+    }
   } catch (error) {
-    res.json({success: false, message: error.message})
+    res.json({ success: false, message: error.message })
   }
 }
 
