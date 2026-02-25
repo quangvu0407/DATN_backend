@@ -58,17 +58,18 @@ const addProduct = async (req, res) => {
 const listProducts = async (req, res) => {
   try {
     const products = await productModel.find({});
-    res.json({ success: true, products });
+    return res.json({ success: true, products });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };
 
 // Xóa sản phẩm
 const removeProduct = async (req, res) => {
   try {
-    await productModel.findByIdAndDelete(req.body.id);
+    const {id} = req.params
+    await productModel.findByIdAndDelete(id);
     res.json({ success: true, message: "Product Removed" });
   } catch (error) {
     console.log(error);
@@ -79,8 +80,8 @@ const removeProduct = async (req, res) => {
 // Thông tin sản phẩm 
 const singleProducts = async (req, res) => {
   try {
-    const { productId } = req.body
-    const product = await productModel.findById(productId)
+    const { id } = req.params
+    const product = await productModel.findById(id)
     if (!product) {
       res.json({ success: false, message: "Product doesn't find!" })
     }
