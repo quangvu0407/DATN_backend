@@ -110,11 +110,64 @@ const getUserProfile = async (req, res) => {
     const orderCount = await orderModel.countDocuments({
       userId: req.user.id,
     });
-    res.json({ success: true, user, orderCount});
+    res.json({ success: true, user, orderCount });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-export { loginUser, registerUser, adminLogin, getUserProfile }
+const updateUserName = async (req, res) => {
+  try {
+    const { newName } = req.body
+    if (!newName) {
+      return res.status(400).json({ success: false, message: "Input your new name" })
+    }
+    const user = await userModel.findByIdAndUpdate(
+      req.user.id,
+      { name: newName },
+      { new: true }
+    )
+
+    res.json({ success: true, message: "Update success", user })
+  }
+  catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    const user = await userModel.findById(req.user.id);
+
+    // 2. Kiểm tra mật khẩu cũ có khớp không
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: "Mật khẩu cũ không chính xác" });
+    }
+
+    // 3. Kiểm tra độ dài mật khẩu mới (Ví dụ: tối thiểu 6 ký tự)
+    if (newPassword.length < 8) {
+      return res.json({ success: false, message: "Please enter strong password" })
+    }
+
+    // 4. Mã hóa mật khẩu mới và lưu
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ success: true, message: "Đổi mật khẩu thành công" });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { loginUser, registerUser, adminLogin, getUserProfile, updateUserName, changePassword }

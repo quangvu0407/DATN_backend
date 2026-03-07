@@ -68,7 +68,7 @@ const listProducts = async (req, res) => {
 // Xóa sản phẩm
 const removeProduct = async (req, res) => {
   try {
-    const {id} = req.params
+    const { id } = req.params
     await productModel.findByIdAndDelete(id);
     res.json({ success: true, message: "Product Removed" });
   } catch (error) {
@@ -93,4 +93,36 @@ const singleProducts = async (req, res) => {
   }
 }
 
-export { addProduct, listProducts, removeProduct, singleProducts }
+const updateProduct = async (req, res) => {
+  try {
+    const { id } = req.params; // Lấy ID từ URL: /api/product/:id
+    const { name, description, price, category, subCategory, bestseller, sizes } = req.body;
+
+    // Tìm và cập nhật sản phẩm
+    const product = await productModel.findByIdAndUpdate(
+      id,
+      {
+        name,
+        description,
+        price: Number(price),
+        category,
+        subCategory,
+        bestseller: bestseller === 'true' || bestseller === true ? true : false,
+        sizes: typeof sizes === 'string' ? JSON.parse(sizes) : sizes
+      },
+      { new: true } // Trả về dữ liệu mới sau khi update
+    );
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found!" });
+    }
+
+    res.json({ success: true, message: "Product updated successfully", product });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { addProduct, listProducts, removeProduct, singleProducts, updateProduct }
